@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dubai Off-Plan Resale — RAG</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a2230;
+    --panel-2: #232d3f;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --accent: #4a9eff;
+    --accent-dim: #2d6bb5;
+    --good: #3fb950;
+    --warn: #d29922;
+    --border: #2d3748;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { font-size: 22px; margin: 0 0 4px; }
+  header p { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  .ask-row { display: flex; gap: 10px; margin-bottom: 8px; }
+  input[type=text] {
+    flex: 1; padding: 13px 15px; font-size: 15px;
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--border); border-radius: 9px; outline: none;
+  }
+  input[type=text]:focus { border-color: var(--accent-dim); }
+  button {
+    padding: 13px 22px; font-size: 15px; font-weight: 600;
+    background: var(--accent); color: #06121f; border: none;
+    border-radius: 9px; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  .opts { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; margin-bottom: 22px; flex-wrap: wrap; }
+  .opts select {
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 5px 8px; font-size: 13px; margin-left: 6px;
+  }
+  .role-wrap { display: flex; align-items: center; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+  .chip {
+    padding: 6px 12px; font-size: 12.5px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 20px; color: var(--muted);
+    cursor: pointer;
+  }
+  .chip:hover { color: var(--text); border-color: var(--accent-dim); }
+  .answer-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 16px; display: none; }
+  .answer-card.show { display: block; }
+  .q-line { font-weight: 600; font-size: 15px; margin-bottom: 6px; color: var(--accent); }
+  .role-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+    color: var(--muted); background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 5px; padding: 2px 7px; margin-left: 8px; }
+  .rewrite { font-size: 12.5px; color: var(--muted); font-style: italic; margin-bottom: 12px; }
+  .answer-text { font-size: 15.5px; margin-bottom: 18px; white-space: pre-wrap; }
+  .meta { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--border); font-size: 13px; }
+  .meta .label { color: var(--muted); }
+  .badge { font-weight: 700; }
+  .badge.good { color: var(--good); }
+  .badge.warn { color: var(--warn); }
+  .cites { margin-top: 16px; }
+  .cites h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 0 0 8px; }
+  .cite {
+    font-size: 12.5px; color: var(--muted); padding: 5px 0;
+    border-bottom: 1px solid var(--panel-2);
+  }
+  .cite b { color: var(--text); font-weight: 600; }
+  .sources { margin-top: 14px; }
+  .sources h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 0 0 8px; }
+  .src { font-size: 12.5px; color: var(--muted); padding: 3px 0; }
+  .loading { color: var(--muted); font-size: 14px; display: none; }
+  .loading.show { display: block; }
+  .err { color: #f85149; font-size: 14px; display: none; margin-top: 10px; }
+  .err.show { display: block; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Dubai Off-Plan Resale — RAG</h1>
+    <p>Hybrid-search retrieval with grounded, citation-verified answers.</p>
+  </header>
+
+  <div class="ask-row">
+    <input type="text" id="q" placeholder="Ask a question about off-plan resale..." autocomplete="off">
+    <button id="askBtn" onclick="ask()">Ask</button>
+  </div>
+  <div class="opts">
+    <label><input type="checkbox" id="verify"> Verify citations (slower)</label>
+    <label><input type="checkbox" id="memory" checked> Conversation memory</label>
+    <span class="role-wrap">
+      <label for="role">Role:</label>
+      <select id="role" title="Access role — scopes which document types are retrievable">
+        <option value="public" selected>public</option>
+        <option value="agent">agent</option>
+        <option value="legal">legal</option>
+        <option value="analyst">analyst (all)</option>
+      </select>
+    </span>
+    <a href="#" onclick="resetConv();return false;" style="color:var(--accent);text-decoration:none;">New conversation</a>
+  </div>
+
+  <div class="examples" id="examples"></div>
+
+  <div class="loading" id="loading">Retrieving and generating…</div>
+  <div class="err" id="err"></div>
+
+  <div id="thread"></div>
+
+  <div class="foot">Answers are grounded in retrieved documents. Not legal or financial advice.</div>
+</div>
+
+<script>
+// each browser tab gets its own session id, so conversations don't mix
+const SESSION_ID = 'sess-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+// how many chunks to retrieve per question. Raised from 5 to 20 (the API's
+// max, AskRequest caps k at 20) so "list all/N projects" questions surface
+// more of the individual listing chunks instead of just the top 5.
+const RETRIEVE_K = 20;
+
+const EXAMPLES = [
+  "Which Dubai law regulates the interim property register?",
+  "What percentage must be paid before an off-plan assignment?",
+  "Give me a list of off-plan projects",
+  "How does construction progress affect resale?",
+];
+
+const exWrap = document.getElementById('examples');
+EXAMPLES.forEach(t => {
+  const c = document.createElement('div');
+  c.className = 'chip'; c.textContent = t;
+  c.onclick = () => { document.getElementById('q').value = t; ask(); };
+  exWrap.appendChild(c);
+});
+
+document.getElementById('q').addEventListener('keydown', e => {
+  if (e.key === 'Enter') ask();
+});
+
+async function resetConv() {
+  await fetch('/v1/reset', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: SESSION_ID }),
+  });
+  document.getElementById('thread').innerHTML = '';
+}
+
+async function ask() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) return;
+  const verify = document.getElementById('verify').checked;
+  const useMemory = document.getElementById('memory').checked;
+  const role = document.getElementById('role').value;
+
+  const btn = document.getElementById('askBtn');
+  const loading = document.getElementById('loading');
+  const err = document.getElementById('err');
+
+  btn.disabled = true;
+  loading.classList.add('show');
+  err.classList.remove('show');
+
+  try {
+    const resp = await fetch('/v1/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, k: RETRIEVE_K, verify: verify, use_memory: useMemory, session_id: SESSION_ID, role: role }),
+    });
+    if (!resp.ok) {
+      const detail = await resp.json().catch(() => ({}));
+      throw new Error(detail.detail || ('Request failed: ' + resp.status));
+    }
+    const data = await resp.json();
+    renderTurn(q, data, role);
+    document.getElementById('q').value = '';
+  } catch (e) {
+    err.textContent = e.message;
+    err.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    loading.classList.remove('show');
+  }
+}
+
+function renderTurn(question, data, role) {
+  const thread = document.getElementById('thread');
+  const card = document.createElement('div');
+  card.className = 'answer-card show';
+
+  // show the role this question was asked under, so switching roles is visible
+  const roleShown = data.role || role || 'public';
+  let html = `<div class="q-line">${escapeHtml(question)}<span class="role-tag">${escapeHtml(roleShown)}</span></div>`;
+  if (data.rewritten_query) {
+    html += `<div class="rewrite">↳ interpreted as: ${escapeHtml(data.rewritten_query)}</div>`;
+  }
+  html += `<div class="answer-text">${escapeHtml(data.answer)}</div>`;
+
+  if (data.citations && data.citations.length) {
+    html += '<div class="cites"><h4>Citations</h4>';
+    data.citations.forEach(c => {
+      const pg = (c.page && c.page !== -1) ? (', p.' + c.page) : '';
+      html += `<div class="cite">[${c.block}] <b>${escapeHtml(c.source)}</b>${pg}</div>`;
+    });
+    html += '</div>';
+  }
+
+  // show retrieved_sources too -- this is what makes access control visible:
+  // switch role, ask the same question, watch this list change.
+  if (data.retrieved_sources && data.retrieved_sources.length) {
+    const uniq = [...new Set(data.retrieved_sources)];
+    html += '<div class="sources"><h4>Retrieved sources</h4>';
+    uniq.forEach(s => { html += `<div class="src">• ${escapeHtml(s)}</div>`; });
+    html += '</div>';
+  }
+
+  const conf = data.confidence || {};
+  let metaHtml = '';
+  if (conf.composite != null) {
+    const cls = conf.composite >= 0.7 ? 'good' : 'warn';
+    metaHtml += `<div><span class="label">Confidence:</span> <span class="badge ${cls}">${conf.composite}</span></div>`;
+  }
+  if (data.faithfulness != null) {
+    const cls = data.faithfulness >= 0.8 ? 'good' : 'warn';
+    metaHtml += `<div><span class="label">Faithfulness:</span> <span class="badge ${cls}">${data.faithfulness.toFixed(2)}</span></div>`;
+  }
+  if (conf.citation_coverage != null) {
+    metaHtml += `<div><span class="label">Coverage:</span> ${conf.citation_coverage}</div>`;
+  }
+  html += `<div class="meta">${metaHtml}</div>`;
+
+  card.innerHTML = html;
+  thread.prepend(card);   // newest on top
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>

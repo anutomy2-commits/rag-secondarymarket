@@ -1,0 +1,250 @@
+{
+    "description": "Labeled eval set for off-plan resale RAG. Each item: question, gold_source (file that should be retrieved), gold_doc_type, reference_answer (for correctness), and answer_keys (substrings a faithful answer should contain).",
+    "questions": [
+      {
+        "id": "q01",
+        "question": "What minimum percentage of the price must an original buyer have paid before a developer approves an off-plan assignment?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "Developers typically require 30 to 40 percent of the price to be paid before approving an assignment; some premium projects set the threshold at 50 percent. The exact figure is in the unit's SPA.",
+        "answer_keys": [
+          "30",
+          "40",
+          "SPA"
+        ]
+      },
+      {
+        "id": "q02",
+        "question": "What is the Oqood re-registration fee for an off-plan resale?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "The Oqood re-registration fee is AED 5,000 to 10,000, set by the DLD.",
+        "answer_keys": [
+          "5,000",
+          "10,000",
+          "Oqood"
+        ]
+      },
+      {
+        "id": "q03",
+        "question": "What document must the seller obtain from the developer to complete an off-plan resale, and what does it confirm?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "A No Objection Certificate (NOC) from the developer. It confirms developer consent to the transfer, that the seller is current on payments, and transfers the remaining payment plan to the new buyer.",
+        "answer_keys": [
+          "No Objection Certificate",
+          "NOC",
+          "consent"
+        ]
+      },
+      {
+        "id": "q04",
+        "question": "What is the total transaction cost range for an off-plan resale as a share of sale price?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "Total resale transaction cost is typically around 6 to 11 percent of the sale price, combining the 4% DLD fee, Oqood re-registration, developer NOC and assignment fees, and agency commission.",
+        "answer_keys": [
+          "6",
+          "11",
+          "sale price"
+        ]
+      },
+      {
+        "id": "q05",
+        "question": "What is an off-plan resale legally called and what is actually being transferred?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "It is an assignment of contract: the seller assigns their rights and obligations under the Sale and Purchase Agreement (SPA) to a new buyer, who assumes the remaining payment plan. No completed unit or title deed is conveyed yet.",
+        "answer_keys": [
+          "assignment",
+          "SPA",
+          "rights and obligations"
+        ]
+      },
+      {
+        "id": "q06",
+        "question": "Which Dubai law regulates the interim property register for off-plan sales?",
+        "gold_source": "DLD_Law13_2008_InterimRegister.pdf",
+        "gold_doc_type": "regulation",
+        "reference_answer": "Law No. (13) of 2008 Regulating the Interim Property Register in the Emirate of Dubai.",
+        "answer_keys": [
+          "13",
+          "2008",
+          "Interim"
+        ]
+      },
+      {
+        "id": "q07",
+        "question": "In the interim property register law, what happens to a unit's registration once the developer receives the completion certificate?",
+        "gold_source": "DLD_Law13_2008_InterimRegister.pdf",
+        "gold_doc_type": "regulation",
+        "reference_answer": "Sold units are entered in the Property Register in the name of purchasers who fulfilled their contractual obligations, once the department receives the completion certificate from the competent entities.",
+        "answer_keys": [
+          "completion certificate",
+          "Property Register",
+          "purchaser"
+        ]
+      },
+      {
+        "id": "q08",
+        "question": "What does Article 11 of Law 19 of 2017 allow a developer to do against a defaulting purchaser?",
+        "gold_source": "DLD_Law19_2017_Art11_ExplanatoryNotes.pdf",
+        "gold_doc_type": "regulation",
+        "reference_answer": "It prescribes procedures and measures a developer may take against a defaulting purchaser without recourse to courts or arbitration, for off-plan sale agreements registered on the interim register.",
+        "answer_keys": [
+          "defaulting purchaser",
+          "without recourse",
+          "off-plan"
+        ]
+      },
+      {
+        "id": "q09",
+        "question": "Under the escrow law, what must happen to payments made by off-plan purchasers?",
+        "gold_source": "DLD_RealEstate_Legislation_Compendium.pdf",
+        "gold_doc_type": "regulation",
+        "reference_answer": "Payments by off-plan purchasers must be deposited into a project-specific escrow account dedicated exclusively to the construction of that development, under Law No. 8 of 2007.",
+        "answer_keys": [
+          "escrow",
+          "account",
+          "construction"
+        ]
+      },
+      {
+        "id": "q10",
+        "question": "What penalty applies to someone conducting real estate development activity without a licence under the escrow law?",
+        "gold_source": "DLD_RealEstate_Legislation_Compendium.pdf",
+        "gold_doc_type": "regulation",
+        "reference_answer": "A jail sentence and a fine of at least AED 100,000, or either penalty, applies to conducting real estate development activity without a licence.",
+        "answer_keys": [
+          "100,000",
+          "licence",
+          "fine"
+        ]
+      },
+      {
+        "id": "q11",
+        "question": "How is the Dubai residential house price index constructed methodologically?",
+        "gold_source": "DLD_HousePriceIndex_Methodology.pdf",
+        "gold_doc_type": "market_data",
+        "reference_answer": "It uses a hedonic regression (hedonic imputation) methodology that treats housing as heterogeneous goods described by their attributes, producing monthly, quarterly and yearly indices.",
+        "answer_keys": [
+          "hedonic",
+          "regression",
+          "attributes"
+        ]
+      },
+      {
+        "id": "q12",
+        "question": "What period of Dubai real estate performance does the DLD Annual Report 2024 cover?",
+        "gold_source": "DLD_AnnualReport_2024.pdf",
+        "gold_doc_type": "market_data",
+        "reference_answer": "It covers transaction volumes, price movements, investment behavior and market shifts from 2007 to 2024, with emphasis on 2023 and early 2024.",
+        "answer_keys": [
+          "2007",
+          "2024",
+          "transaction"
+        ]
+      },
+      {
+        "id": "q13",
+        "question": "Which factors most often make an early off-plan resale uneconomic?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "The developer assignment fee (around 2 to 5 percent of the original price) and the minimum payment threshold: a seller who has paid only a small share may be below threshold, and even if eligible the assignment fee can wipe out a thin premium.",
+        "answer_keys": [
+          "assignment fee",
+          "threshold",
+          "premium"
+        ]
+      },
+      {
+        "id": "q14",
+        "question": "How does construction progress affect an off-plan unit's resale?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "Higher completion percentage generally lifts buyer confidence and price and also helps clear the minimum payment threshold, so progress affects both eligibility to sell and demand.",
+        "answer_keys": [
+          "completion",
+          "confidence",
+          "threshold"
+        ]
+      },
+      {
+        "id": "q15",
+        "question": "What is the highest price per square foot among the off-plan resale listings sampled?",
+        "gold_source": "PropertyFinder_OffPlan_Resale_Listings.pdf",
+        "gold_doc_type": "listings",
+        "reference_answer": "Around AED 3,500 per square foot (a Palm Jumeirah / Business Bay apartment in the sampled listings).",
+        "answer_keys": [
+          "3,5",
+          "sqft"
+        ],
+        "gold_source_alt": [
+          "PropertyFinder_OffPlan_Resale_Listings.pdf",
+          "PropertyFinder_OffPlan_Resale_source.json"
+        ]
+      },
+      {
+        "id": "q16",
+        "question": "Name communities where off-plan resale apartments are listed in the sample.",
+        "gold_source": "PropertyFinder_OffPlan_Resale_Listings.pdf",
+        "gold_doc_type": "listings",
+        "reference_answer": "Communities include Dubai Islands, Business Bay, Dubai Marina, Palm Jumeirah, Dubai Creek Harbour, JLT, and Dubai Silicon Oasis.",
+        "answer_keys": [
+          "Business Bay",
+          "Dubai Islands"
+        ],
+        "gold_source_alt": [
+          "PropertyFinder_OffPlan_Resale_Listings.pdf",
+          "PropertyFinder_OffPlan_Resale_source.json"
+        ]
+      },
+      {
+        "id": "q17",
+        "question": "Who must facilitate an off-plan assignment sale and where is it finalized?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "It must be facilitated by a RERA-registered broker and finalized at a DLD-approved trustee office, with the Oqood record updated to the new buyer.",
+        "answer_keys": [
+          "RERA",
+          "trustee",
+          "Oqood"
+        ]
+      },
+      {
+        "id": "q18",
+        "question": "What is the DLD transfer fee on an off-plan resale and who typically pays it?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "The DLD transfer fee is 4% of the sale price, typically paid by the buyer, though it can be split 2%/2% if agreed in the MOU.",
+        "answer_keys": [
+          "4%",
+          "buyer"
+        ]
+      },
+      {
+        "id": "q19",
+        "question": "Why does developer reputation affect off-plan resale price?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "Tier-1 developers with a delivery track record command stronger resale demand and premiums, while weaker developers widen discounts.",
+        "answer_keys": [
+          "reputation",
+          "premium",
+          "demand"
+        ]
+      },
+      {
+        "id": "q20",
+        "question": "What must be true about a unit's Oqood registration before an assignment has legal standing with the DLD?",
+        "gold_source": "OffPlan_Resale_Factors_Reference.pdf",
+        "gold_doc_type": "reference",
+        "reference_answer": "The unit must be registered in the interim (Oqood) register and the Oqood record must be updated to name the new buyer; otherwise the transfer has no legal standing with the DLD.",
+        "answer_keys": [
+          "Oqood",
+          "new buyer",
+          "legal standing"
+        ]
+      }
+    ]
+  }
