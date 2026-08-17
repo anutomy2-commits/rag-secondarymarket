@@ -7,3 +7,4 @@ numpy==2.5.1
 anthropic==0.121.0
 python-dotenv==1.2.2
 pdfplumber==0.11.10
+gradio==6.24.0

@@ -1,3 +1,13 @@
+---
+title: Dubai Off-Plan Resale RAG
+emoji: 🏗️
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+app_file: src/app.py
+pinned: false
+---
+
 # Dubai Off-Plan Resale RAG
 
 A retrieval-augmented generation service over a small corpus of Dubai
@@ -27,9 +37,13 @@ Served over FastAPI with a single-page web UI.
 - **Conversation memory** — follow-up questions ("and who pays it?") are
   rewritten into standalone queries using recent turns before retrieval,
   per session.
-- **Web UI** (`src/static/index.html`) — ask questions, switch the access
-  role live to see retrieval change, inspect citations/confidence/sources
-  for each answer.
+- **Two front ends over the same pipeline** — `src/api.py` (FastAPI +
+  `src/static/index.html`) for a real HTTP API, and `src/app.py`
+  (Gradio) as a free-tier-deployable chat UI. Both call the exact same
+  sibling modules; `src/app.py` mirrors `api.py`'s startup and
+  per-request logic step for step, just as a chat UI instead of JSON
+  endpoints. Both let you switch the access role live and inspect
+  citations/confidence/sources for each answer.
 
 **Not part of the live API:** `src/retrievers.py` also implements a
 cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`) and a
@@ -87,6 +101,7 @@ authenticated caller (SSO/IAM claims), never a client-supplied value.
 ```
 src/
   api.py                  FastAPI app: /health, /, /v1/documents, /v1/ask, /v1/reset
+  app.py                   Gradio UI -- mirrors api.py's pipeline for free-tier Spaces
   ingest.py                PDF/JSON -> chunks, corpus fingerprinting
   access_control.py        Roles -> doc_type visibility, policy enforcement
   retrievers_production.py Persistent (Chroma+BM25) hybrid retriever used by the API
@@ -122,20 +137,34 @@ Create a `.env` file in the project root:
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Run the API:
+Run the FastAPI service:
 
 ```bash
 uvicorn src.api:app --reload
 ```
 
+Or run the Gradio UI (same pipeline, different front end) -- run from
+the repo root so `./data/chroma_store` resolves correctly:
+
+```bash
+python src/app.py
+```
+
 On first run (or whenever `data/raw/` changes), startup embeds the
 corpus and builds the Chroma + BM25 index — this takes a little while.
 Later runs detect the persisted index is still valid and load it
-directly. Open `http://localhost:8000` for the web UI, or
-`http://localhost:8000/docs` for the interactive API docs.
+directly. Both entry points share `data/chroma_store/`, so whichever
+you run first pays the build cost.
 
-`/health` and `/v1/documents` work without an API key; `/v1/ask` needs
+FastAPI: open `http://localhost:8000` for the web UI, or
+`http://localhost:8000/docs` for the interactive API docs. `/health` and
+`/v1/documents` work without an API key; `/v1/ask` needs
 `ANTHROPIC_API_KEY` set.
+
+Gradio: open `http://127.0.0.1:7860`. Ask a question, note the sources
+listed in the side panel, then switch the **Role** dropdown (e.g.
+`public` → `legal`) and ask the same question again — the sources
+listed should change, since retrieval is re-scoped per role.
 
 ### Offline scripts
 
@@ -188,6 +217,55 @@ Notes:
 To deploy: push to GitHub, connect the repo on Render as a Blueprint
 (reads `render.yaml` automatically), set `ANTHROPIC_API_KEY` in the
 dashboard, and deploy.
+
+**Note:** Render's free instance type caps RAM at 512MB, which isn't
+enough to load the `sentence-transformers` embedding model alongside the
+rest of the app — this project now deploys to Hugging Face Spaces
+instead (below), which gives more free RAM for the same $0.
+
+## Deploying to Hugging Face Spaces (Gradio, free tier)
+
+This is the active deploy path: the YAML header at the top of this
+README (`sdk: gradio`, `app_file: src/app.py`) tells Spaces to run
+`src/app.py` directly on its free CPU tier — no Docker build, no paid
+tier required.
+
+To deploy:
+
+1. Create a new Space on [huggingface.co/new-space](https://huggingface.co/new-space) with SDK = **Gradio**.
+2. Push this repo to the Space's git remote (Spaces are git repos, same
+   flow as GitHub — `git remote add space <space-repo-url>` then
+   `git push space main`), or connect it as a GitHub-linked Space if you
+   prefer syncing from `origin` instead.
+3. In the Space's **Settings → Repository secrets**, add
+   `ANTHROPIC_API_KEY`. The code reads it via `os.environ` (see
+   `generate_llm.py`, `memory.py`, `verify.py`) — nothing in `src/`
+   hardcodes a key, and `.env` stays gitignored so it never reaches the
+   Space.
+
+Notes:
+
+- **Single process, no worker flag needed** — Spaces runs `src/app.py`
+  directly with `python`, and `SessionMemoryStore` being in-process
+  memory is fine here since there's only ever one process. `src/app.py`
+  additionally isolates each browser tab into its own session id
+  (`gr.State` + `demo.load`), so concurrent visitors don't share
+  conversation memory.
+- **No persistent storage attached**, so exactly like Render: the Chroma
+  + BM25 index rebuilds from `data/raw/` on first startup after every
+  restart. Spaces' free CPU tier has more RAM than Render's free tier,
+  which is what made loading the embedding model feasible here.
+- Set a spending cap on the Anthropic key before the Space goes public —
+  anyone with the Space's URL can trigger LLM calls by asking a question.
+
+### Alternative: Docker Space (paid tier)
+
+The repo also includes a `Dockerfile` that runs `src/api.py` (the
+FastAPI service) on port 7860, for if you ever upgrade to a paid Space
+and want the real HTTP API instead of the Gradio UI. To use it, switch
+the README header back to `sdk: docker` / `app_port: 7860` (Spaces reads
+one SDK at a time from the header) and follow the same secret-setup
+steps above.
 
 ## API reference
 

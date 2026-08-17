@@ -1,0 +1,23 @@
+# Secrets -- never bake into the image
+.env
+.env.*
+
+.git
+.gitignore
+
+venv/
+.venv/
+env/
+ENV/
+
+__pycache__/
+*.py[cod]
+
+# Rebuilt at container startup from data/raw -- don't ship a possibly-stale
+# locally-built index into the image
+data/chroma_store/
+data/processed/
+
+.DS_Store
+.vscode/
+.idea/
