@@ -1,10 +1,9 @@
 """
-Gradio UI for the RAG pipeline -- a free-tier-deployable front door for
-Hugging Face Spaces (Docker Spaces require a paid tier; Gradio Spaces are
-free). Same pipeline, same src/ modules as src/api.py's /v1/ask -- this
-file only swaps the transport (HTTP JSON -> chat UI). Nothing under src/
-was changed; see api.py's lifespan() and ask() for the reference this
-mirrors step for step.
+Gradio UI for the RAG pipeline -- the free-tier-deployable front door for
+Hugging Face Spaces. Same pipeline, same src/ modules as src/api.py's
+/v1/ask -- this file only swaps the transport (HTTP JSON -> chat UI).
+Nothing under src/ was changed; see api.py's lifespan() and ask() for the
+reference this mirrors step for step.
 
 Run it locally (from the repo root, so ./data/chroma_store resolves):
     pip install -r requirements.txt
@@ -15,6 +14,17 @@ Needs ANTHROPIC_API_KEY (in .env locally, or a Space Secret on Spaces).
 """
 import uuid
 
+# Free-tier Gradio Spaces run on ZeroGPU hardware, which refuses to start
+# unless `spaces` is imported before anything that touches CUDA AND at least
+# one @spaces.GPU function exists. This app is CPU-only (embeddings/BM25
+# locally, generation via the Anthropic API), so the requirement is satisfied
+# with a placeholder below that is never called -- no GPU is ever allocated.
+# Import is optional so local runs don't need the Spaces-only package.
+try:
+    import spaces
+except ImportError:
+    spaces = None
+
 import gradio as gr
 
 from ingest import structured_chunks_deduped, corpus_fingerprint
@@ -24,6 +34,13 @@ from verify import verify_citations, confidence_score
 from memory import SessionMemoryStore, contextualize_query
 
 ROLES = ["public", "agent", "legal", "analyst"]
+
+
+if spaces is not None:
+    @spaces.GPU
+    def _zerogpu_placeholder():
+        """Never called -- exists only so ZeroGPU's startup check passes."""
+        return None
 
 # ---- app state: built ONCE at import time, mirrors api.py's lifespan() ----
 STATE = {"retriever": None, "n_chunks": 0, "sessions": SessionMemoryStore()}
