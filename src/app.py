@@ -185,45 +185,128 @@ THEME = gr.themes.Soft(
 )
 
 CUSTOM_CSS = """
-.gradio-container {max-width: 1200px !important; margin: auto;}
+.gradio-container {max-width: 1150px !important; margin: auto;}
 #hero {
-    padding: 28px 32px;
-    border-radius: 16px;
+    padding: 26px 32px;
+    border-radius: 18px;
     background: linear-gradient(135deg, #1e293b 0%, #1e1b4b 55%, #172554 100%);
     border: 1px solid rgba(99,102,241,0.35);
-    margin-bottom: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px -8px rgba(30,27,75,0.6);
 }
 #hero h1 {
     margin: 0 0 6px 0;
-    font-size: 1.65rem;
+    font-size: 1.6rem;
     background: linear-gradient(90deg, #a5b4fc, #93c5fd);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
 }
-#hero p {margin: 0; opacity: 0.85; line-height: 1.5;}
+#hero p {margin: 0; opacity: 0.85; line-height: 1.5; font-size: 0.94rem;}
+
+/* ---- composer (question + ask + examples) ---- */
+#composer {
+    border-radius: 16px;
+    padding: 16px 18px 12px 18px;
+    background: rgba(30,41,59,0.55);
+    border: 1px solid rgba(148,163,184,0.15);
+    margin-bottom: 18px;
+}
+#composer_row {align-items: flex-end; gap: 10px;}
+#question_box textarea {
+    background: rgba(15,23,42,0.65) !important;
+    border: 1px solid rgba(148,163,184,0.25) !important;
+    border-radius: 12px !important;
+    font-size: 0.98rem !important;
+    padding: 12px 14px !important;
+}
+#question_box textarea:focus {
+    border-color: rgba(129,140,248,0.7) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+}
+#ask_btn {
+    font-weight: 600;
+    border-radius: 12px !important;
+    min-width: 96px;
+    height: 46px;
+}
+#composer_footer {
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+#examples_row {background: transparent !important; border: none !important; padding: 0 !important; flex: 1;}
+#examples_row .label {display: none !important;}
+#examples_row .gallery {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 6px;
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+#examples_row .gallery-item {
+    border: 1px solid rgba(148,163,184,0.25) !important;
+    border-radius: 999px !important;
+    background: rgba(15,23,42,0.55) !important;
+    padding: 6px 14px !important;
+    transition: all 0.15s ease;
+    width: auto !important;
+}
+#examples_row .gallery-item:hover {
+    border-color: rgba(129,140,248,0.6) !important;
+    background: rgba(79,70,229,0.15) !important;
+    transform: translateY(-1px);
+}
+#examples_row .gallery-item div {
+    font-size: 0.8rem !important;
+    color: #cbd5e1 !important;
+    white-space: nowrap !important;
+    --local-text-width: auto !important;
+}
+#clear_btn {
+    font-size: 0.82rem !important;
+    color: #94a3b8 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 8px !important;
+}
+#clear_btn:hover {color: #e2e8f0 !important;}
+
+/* ---- chat panel ---- */
+#chatbot_card {
+    border-radius: 16px !important;
+    border: 1px solid rgba(148,163,184,0.15) !important;
+}
+
+/* ---- sidebar ---- */
 #sidebar {
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 18px;
     background: rgba(30,41,59,0.55);
     border: 1px solid rgba(148,163,184,0.15);
+    height: 100%;
 }
-#sidebar .gr-markdown h3, #sidebar h3 {
+#sidebar h3 {
     margin-top: 14px;
     margin-bottom: 6px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: #93c5fd;
     border-bottom: 1px solid rgba(148,163,184,0.2);
     padding-bottom: 4px;
 }
+#sidebar h3:first-child {margin-top: 0;}
 #sources_box, #confidence_box {
-    min-height: 46px;
-    font-size: 0.92rem;
+    min-height: 40px;
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 #role_row {gap: 8px;}
-#ask_btn {font-weight: 600;}
 footer {display: none !important;}
 """
 
@@ -241,21 +324,29 @@ with gr.Blocks(title="Dubai Off-Plan Resale RAG") as demo:
 
     with gr.Row(equal_height=False):
         with gr.Column(scale=3):
-            chatbot = gr.Chatbot(height=480, label="Conversation",
-                                  avatar_images=(None, "🏗️"), buttons=["copy"])
-            question = gr.Textbox(placeholder="Ask about off-plan resale rules, fees, listings...",
-                                  label="Question", lines=2)
-            with gr.Row():
-                ask_btn = gr.Button("Ask", variant="primary", elem_id="ask_btn", scale=3)
-                clear_btn = gr.Button("Clear conversation", scale=1)
-            gr.Examples(
-                examples=[
-                    "What fees apply when reselling an off-plan unit before handover?",
-                    "Can I assign my SPA before the project is complete?",
-                    "What documents does DLD require for an off-plan resale (Oqood transfer)?",
-                ],
-                inputs=question,
-                label="Try asking",
+            with gr.Column(elem_id="composer"):
+                with gr.Row(elem_id="composer_row"):
+                    question = gr.Textbox(placeholder="Ask about off-plan resale rules, fees, listings...",
+                                          show_label=False, lines=1, max_lines=6,
+                                          elem_id="question_box", scale=6, container=False)
+                    ask_btn = gr.Button("Ask", variant="primary", elem_id="ask_btn", scale=1)
+                with gr.Row(elem_id="composer_footer"):
+                    gr.Examples(
+                        examples=[
+                            "What fees apply when reselling an off-plan unit before handover?",
+                            "Can I assign my SPA before the project is complete?",
+                            "What documents does DLD require for an off-plan resale (Oqood transfer)?",
+                        ],
+                        inputs=question,
+                        label="",
+                        elem_id="examples_row",
+                    )
+                    clear_btn = gr.Button("Clear conversation", elem_id="clear_btn", size="sm")
+            chatbot = gr.Chatbot(
+                height=440, label="Conversation", elem_id="chatbot_card",
+                avatar_images=(None, "🏗️"), buttons=["copy"],
+                placeholder="### 💬 Ask about DLD regulations, resale fees, or listings\n"
+                            "Answers are grounded in the retrieved documents and cited by source.",
             )
         with gr.Column(scale=1, elem_id="sidebar"):
             gr.Markdown("### Access control")
